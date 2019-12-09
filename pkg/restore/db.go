@@ -88,12 +88,9 @@ func (db *DB) CreateTable(ctx context.Context, table *utils.Table) error {
 	}
 	createSQL := buf.String()
 	// Insert `IF NOT EXISTS` statement to skip the created tables
-	words := strings.Split(createSQL, " ")
-	if len(words) > 2 && strings.ToUpper(words[0]) == "CREATE" && strings.ToUpper(words[1]) == "TABLE" {
-		resWords := append([]string{}, words[:2]...)
-		resWords = append(resWords, "IF NOT EXISTS")
-		resWords = append(resWords, words[2:]...)
-		createSQL = strings.Join(resWords, " ")
+	words := strings.SplitN(createSQL, " ", 3)
+	if len(words) != 3 && strings.ToUpper(words[0]) == "CREATE" && strings.ToUpper(words[1]) == "TABLE" {
+		createSQL = "CREATE TABLE IF NOT EXIST " + words[2]
 	} else {
 		log.Error(
 			"build create table SQL error",
